@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-test
+  namespace: ns-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-test
+  template:
+    metadata:
+      labels:
+        app: app-test
+    spec:
+      containers:
+      - image: alpine:edge
+        name: app-test
+        command: ["/bin/sh", "-c"]
+        args:
+        - |-
+            apk update
+            apk add --no-cache curl python3
+            echo "Responsed from app-test on " >> index.html
+            python -m http.server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-test
+  namespace: ns-test
+spec:
+  selector:
+    app: app-test
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
